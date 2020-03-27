@@ -17,14 +17,20 @@ def index(request):
         return render(request, 'index.html', {'page': page, 'paginator': paginator})
 
 def group_posts(request, slug):
-    # функция get_object_or_404 позволяет получить объект из базы данных 
-    # по заданным критериям или вернуть сообщение об ошибке если объект не найден
-    group = get_object_or_404(Group, slug=slug)
 
-    # Метод .filter позволяет ограничить поиск по критериям. Это аналог добавления
-    # условия WHERE group_id = {group_id}
-    posts = Post.objects.filter(group=group).order_by("-pub_date")[:12]
-    return render(request, "group.html", {"group": group, "posts": posts})
+
+        # функция get_object_or_404 позволяет получить объект из базы данных 
+        # по заданным критериям или вернуть сообщение об ошибке если объект не найден
+        group = get_object_or_404(Group, slug=slug)
+
+        # Метод .filter позволяет ограничить поиск по критериям. Это аналог добавления
+        # условия WHERE group_id = {group_id}
+        posts = Post.objects.filter(group=group).order_by("-pub_date").all()
+        paginator = Paginator(posts, 10) # показывать по 10 записей на странице.
+
+        page_number = request.GET.get('page') # переменная в URL с номером запрошенной страницы
+        page = paginator.get_page(page_number) # получить записи с нужным смещением
+        return render(request, "group.html", {"group": group, "posts": posts, 'paginator': paginator})
 
 def new_post(request):
         if request.user.is_authenticated : #Праверка авторизации
