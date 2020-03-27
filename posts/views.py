@@ -30,7 +30,7 @@ def group_posts(request, slug):
 
         page_number = request.GET.get('page') # переменная в URL с номером запрошенной страницы
         page = paginator.get_page(page_number) # получить записи с нужным смещением
-        return render(request, "group.html", {"group": group, "posts": posts, 'paginator': paginator})
+        return render(request, "group.html", {"group": group, "posts": posts, 'paginator': paginator, 'page': page})
 
 def new_post(request):
         if request.user.is_authenticated : #Праверка авторизации
