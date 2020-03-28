@@ -75,7 +75,7 @@ def post_edit(request, username, post_id):
                         if form.is_valid():
                                 post.text = form.cleaned_data['text']
                                 post.save()
-                                return redirect('profile', username)
+                                return redirect('post', username, post_id) #redirect('profile', username)
 
                 return render(request, "new.html", {'form':form, 'post': post})
         return redirect('post', username, post_id)
