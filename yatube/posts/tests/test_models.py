@@ -22,7 +22,7 @@ class PostModelTest(TestCase):
         )
 
     def test_verbose_name(self):
-        """verbose_name в полях совпадает с ожидаемым."""
+        """verbose_name в полях совпадает с ожжжидаемым."""
         post = PostModelTest.post
         field_verboses = {
             'text': 'Текст',
