@@ -1,8 +1,10 @@
 # posts/tests/test_views.py
+from distutils.command import upload
 from django import forms
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from posts.forms import PostForm
 from posts.models import Group, Post
@@ -41,6 +43,25 @@ class PostPagesTests(TestCase):
             author=cls.user,
             group=cls.group_1
         )
+
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00'
+            b'\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
+            b'\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
+        cls.form = PostForm()
+        cls.form_data = {
+            'text': 'New',
+            'group': cls.group.id,
+            'image': uploaded
+        }
 
     def setUp(self):
         # Создаем неавторизованный клиент
@@ -149,12 +170,53 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': f'{post_group}'})
         )
-        # print(response.context.get('page_obj')[0].__str__())
         context_gruop_list_text = response.context.get('page_obj')
         expected = None
         # Проверяем, что контекст соответствует ожиданию
         self.assertEqual(context_gruop_list_text, expected)
 
+    def test_index_image_context(self):
+        """Шаблон index сформирован с картинкой в контексте."""
+        response = self.authorized_client.get(
+            reverse('posts:index')
+        )
+        context_profile_image = response.context.get('page_obj')[0].image
+        expected_image = self.post.image
+        # Проверяем, что контекст соответствует ожиданию
+        self.assertEqual(context_profile_image, expected_image)
+
+    def test_profile_image_context(self):
+        """Шаблон profile сформирован с картинкой в контексте."""
+        post_author = self.post.author
+        response = self.authorized_client.get(
+            reverse('posts:profile', kwargs={'username': f'{post_author}'})
+        )
+        context_profile_image = response.context.get('page_obj')[0].image
+        expected_image = self.post.image
+        # Проверяем, что контекст соответствует ожиданию
+        self.assertEqual(context_profile_image, expected_image)
+
+    def test_post_detail_image_context(self):
+        """Шаблон post_detail сформирован с картинкой в контексте."""
+        post_id = self.post.id
+        response = self.authorized_client.get(
+            reverse('posts:post_detail', kwargs={'post_id': f'{post_id}'})
+        )
+        context_profile_image = response.context.get('post').image
+        expected_image = self.post.image
+        # Проверяем, что контекст соответствует ожиданию
+        self.assertEqual(context_profile_image, expected_image)
+
+    def test_group_image_context(self):
+        """Шаблон group_list сформирован с картинкой в контексте."""
+        post_group = self.post.group.slug
+        response = self.authorized_client.get(
+            reverse('posts:group_list', kwargs={'slug': f'{post_group}'})
+        )
+        context_group_list_image = response.context.get('page_obj')[0].image
+        expected_image = self.post.image
+        # Проверяем, что контекст соответствует ожиданию
+        self.assertEqual(context_group_list_image, expected_image)
 
 class PaginatorViewsTest(TestCase):
     @classmethod
@@ -321,9 +383,9 @@ class PostFormTests(PostForm):
 
     def setUp(self):
         self.authorized_client = Client()
-        self.authorized_client.force_login(PostFormTests.user_author)
+        self.authorized_client.force_login(self.user_author)
 
-    def create_post_post(self):
+    def test_create_post(self):
         """Валидная форма создает запись в Post."""
 
         self.post3 = Post.objects.create(
@@ -335,9 +397,6 @@ class PostFormTests(PostForm):
         tasks_count = Post.objects.count()
 
         response = self.authorized_client.get(reverse('posts:post_create'))
-        first_object = response.context['post']
-        print(first_object.text)
-        print(first_object.group)
         form_data = {
             'text': 'Новый текст поста',
             'group': PostFormTests.group2,
@@ -351,5 +410,9 @@ class PostFormTests(PostForm):
         # Проверяем, сработал ли редирект
         self.assertRedirects(response, reverse('posts:post_create'))
 
-        # Проверяем, увеличилось ли число постов
+    #     # Проверяем, увеличилось ли число постов
         self.assertEqual(Post.objects.count(), tasks_count + 1)
+
+
+
+

@@ -136,3 +136,4 @@ htmlcov/
 coverage.xml
 *.cover
 bootstrap.min.css
+media/

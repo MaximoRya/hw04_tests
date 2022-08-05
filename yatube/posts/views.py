@@ -71,8 +71,10 @@ def post_detail(request, post_id):
 
 @login_required
 def post_create(request):
-    form = PostForm(request.POST)
-
+    form = PostForm(
+        request.POST,
+        files=request.FILES or None,
+    )
     if request.user.is_authenticated:
 
         if form.is_valid():
@@ -88,7 +90,11 @@ def post_create(request):
 def post_edit(request, post_id):
     post_list = Post.objects.all()
     post = get_object_or_404(Post, id=post_id, author=request.user)
-    form = PostForm(request.POST, instance=post)
+    form = PostForm(
+        request.POST,
+        files=request.FILES or None,
+        instance=post
+    )
     if request.method == 'GET':
         return render(request, 'posts/create_post.html',
                       {'post_list': post_list,
@@ -97,9 +103,17 @@ def post_edit(request, post_id):
                        'form': form,
                        'post_id': post_id,
                        })
-    form = PostForm(instance=post)
+    form = PostForm(
+        request.POST,
+        files=request.FILES or None,
+        instance=post
+        )
     if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(
+            request.POST,
+            files=request.FILES or None,
+            instance=post
+            )
         if form.is_valid():
             form.save()
         return redirect('posts:post_detail', post_id=post.pk)
