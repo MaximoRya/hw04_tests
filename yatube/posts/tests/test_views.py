@@ -179,38 +179,6 @@ class PostPagesTests(TestCase):
         # Проверяем, что контекст соответствует ожиданию
         self.assertEqual(context_gruop_list_text, expected)
 
-    def test_index_image_context(self):
-        """Шаблон index сформирован с картинкой в контексте."""
-        response = self.authorized_client.get(INDEX_URL)
-        context_profile_image = response.context.get('page_obj')[0].image
-        expected_image = self.post.image
-        # Проверяем, что контекст соответствует ожиданию
-        self.assertEqual(context_profile_image, expected_image)
-
-    def test_profile_image_context(self):
-        """Шаблон profile сформирован с картинкой в контексте."""
-        response = self.authorized_client.get(PROFILE_URL)
-        context_profile_image = response.context.get('page_obj')[0].image
-        expected_image = self.post.image
-        # Проверяем, что контекст соответствует ожиданию
-        self.assertEqual(context_profile_image, expected_image)
-
-    def test_post_detail_image_context(self):
-        """Шаблон post_detail сформирован с картинкой в контексте."""
-        response = self.authorized_client.get(self.POST_EDIT_URL)
-        context_profile_image = response.context.get('post').image
-        expected_image = self.post.image
-        # Проверяем, что контекст соответствует ожиданию
-        self.assertEqual(context_profile_image, expected_image)
-
-    def test_group_image_context(self):
-        """Шаблон group_list сформирован с картинкой в контексте."""
-        response = self.authorized_client.get(GROUP_URL)
-        context_group_list_image = response.context.get('page_obj')[0].image
-        expected_image = self.post.image
-        # Проверяем, что контекст соответствует ожиданию
-        self.assertEqual(context_group_list_image, expected_image)
-
 
 class PaginatorViewsTest(TestCase):
     @classmethod
