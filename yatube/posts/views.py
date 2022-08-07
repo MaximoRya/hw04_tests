@@ -119,7 +119,7 @@ def post_edit(request, post_id):
         request.POST,
         files=request.FILES or None,
         instance=post
-        )
+    )
     if request.method == 'POST':
         form = PostForm(
             request.POST,
