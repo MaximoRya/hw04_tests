@@ -8,7 +8,7 @@ class PostForm(forms.ModelForm):
 
         model = Post
         help_text = 'Текст сообщения и группа'
-        fields = ('group', 'text', 'image')
+        fields = ('group', 'text')
 
 
 class CommentForm(forms.ModelForm):
