@@ -123,7 +123,7 @@ class PostPagesTests(TestCase):
             response.context.get('page_obj')[0].group.slug
         )
         context_gruop_list_text = response.context.get('page_obj')[0].text
-        expected_group = self.post.group.slug
+        expected_group = self.group_1.slug
         expected_text = self.post.text
         # Проверяем, что контекст соответствует ожиданию
         self.assertEqual(context_gruop_list_group, expected_group)

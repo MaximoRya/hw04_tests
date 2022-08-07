@@ -9,11 +9,11 @@ TEST_AUTOR = 'author_test'
 GROUP_SLUG = 'slug_test'
 INDEX_URL = reverse('posts:index')
 GROUP_URL = reverse(
-                'posts:group_list', kwargs={'slug': GROUP_SLUG}
-            )
+    'posts:group_list', kwargs={'slug': GROUP_SLUG}
+)
 PROFILE_URL = reverse(
-                'posts:profile', kwargs={'username': TEST_AUTOR}
-            )
+    'posts:profile', kwargs={'username': TEST_AUTOR}
+)
 CREATE_POST_URL = reverse('posts:post_create')
 
 
@@ -46,11 +46,11 @@ class PostPagesTests(TestCase):
 
         POST_ID = cls.post.id
         cls.POST_DETAIL_URL = reverse(
-                'posts:post_detail', kwargs={'post_id': POST_ID}
-        )
+                            'posts:post_detail', kwargs={'post_id': POST_ID}
+                        )
         cls.POST_EDIT_URL = reverse(
-            'posts:post_edit', kwargs={'post_id': POST_ID}
-        )
+                            'posts:post_edit', kwargs={'post_id': POST_ID}
+                        )
 
     def setUp(self):
         # Создаем неавторизованный клиент
@@ -59,12 +59,6 @@ class PostPagesTests(TestCase):
         self.authorized_client = Client()
         # Авторизуем пользователя
         self.authorized_client.force_login(self.user_author)
-
-        # self.post = Post.objects.create(
-        #     author=PostPagesTests.user_author,
-        #     group=PostPagesTests.group,
-        #     text='Тестовый пост',
-        # )
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
