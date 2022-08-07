@@ -46,11 +46,11 @@ class PostPagesTests(TestCase):
 
         POST_ID = cls.post.id
         cls.POST_DETAIL_URL = reverse(
-                            'posts:post_detail', kwargs={'post_id': POST_ID}
-                        )
+            'posts:post_detail', kwargs={'post_id': POST_ID}
+        )
         cls.POST_EDIT_URL = reverse(
-                            'posts:post_edit', kwargs={'post_id': POST_ID}
-                        )
+            'posts:post_edit', kwargs={'post_id': POST_ID}
+        )
 
     def setUp(self):
         # Создаем неавторизованный клиент

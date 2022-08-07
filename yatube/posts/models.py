@@ -67,17 +67,18 @@ class Comment(models.Model):
         auto_now_add=True,
         verbose_name='Дата комментарии'
     )
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='comments',
-                               verbose_name='Автор комментария',
-                               )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор комментария',
+    )
     post = models.ForeignKey(
-                            Post,
-                            on_delete=models.CASCADE,
-                            related_name='comments',
-                            verbose_name='Я пока не понял',
-                        )
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Я пока не понял',
+    )
 
     class Meta:
         ordering = ('-created',)
