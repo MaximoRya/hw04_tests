@@ -1,12 +1,20 @@
 # posts/tests/test_views.py
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.forms import PostForm
-from posts.models import Group, Post
+from posts.models import Group, Post, User
 
-User = get_user_model()
+TEST_AUTOR = 'author_test'
+GROUP_SLUG = 'slug_test'
+INDEX_URL = reverse('posts:index')
+GROUP_URL = reverse(
+                'posts:group_list', kwargs={'slug': GROUP_SLUG}
+            )
+PROFILE_URL = reverse(
+                'posts:profile', kwargs={'username': TEST_AUTOR}
+            )
+CREATE_POST_URL = reverse('posts:post_create')
 
 
 class PostPagesTests(TestCase):
@@ -30,10 +38,18 @@ class PostPagesTests(TestCase):
         cls.user_author = User.objects.create_user(username='author_test')
         cls.form = PostForm()
         # Создадим запись в БД для проверки доступности адресов страниц
-        cls.post1 = Post.objects.create(
+        cls.post = Post.objects.create(
             text='Тестовый текст',
             author=cls.user_author,
-            group=cls.group_1
+            group=cls.group
+        )
+
+        POST_ID = cls.post.id
+        cls.POST_DETAIL_URL = reverse(
+                'posts:post_detail', kwargs={'post_id': POST_ID}
+        )
+        cls.POST_EDIT_URL = reverse(
+            'posts:post_edit', kwargs={'post_id': POST_ID}
         )
 
     def setUp(self):
@@ -44,33 +60,23 @@ class PostPagesTests(TestCase):
         # Авторизуем пользователя
         self.authorized_client.force_login(self.user_author)
 
-        self.post = Post.objects.create(
-            author=PostPagesTests.user_author,
-            group=PostPagesTests.group,
-            text='Тестовый без группы пост',
-        )
+        # self.post = Post.objects.create(
+        #     author=PostPagesTests.user_author,
+        #     group=PostPagesTests.group,
+        #     text='Тестовый пост',
+        # )
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         # Собираем в словарь пары "имя_html_шаблона: reverse(name)"
-        group = self.post.group.slug
-        post_author = self.post.author
-        postik_id = self.post.pk
+
         templates_pages_names = {
-            reverse('posts:index'): 'posts/index.html',
-            reverse(
-                'posts:profile', kwargs={'username': f'{post_author}'}
-            ): 'posts/profile.html',
-            reverse(
-                'posts:group_list', kwargs={'slug': f'{group}'}
-            ): 'posts/group_list.html',
-            reverse('posts:post_create'): 'posts/create_post.html',
-            reverse(
-                'posts:post_detail', kwargs={'post_id': f'{postik_id}'}
-            ): 'posts/post_detail.html',
-            reverse(
-                'posts:post_edit', kwargs={'post_id': f'{postik_id}'}
-            ): 'posts/create_post.html',
+            INDEX_URL: 'posts/index.html',
+            PROFILE_URL: 'posts/profile.html',
+            GROUP_URL: 'posts/group_list.html',
+            CREATE_POST_URL: 'posts/create_post.html',
+            self.POST_DETAIL_URL: 'posts/post_detail.html',
+            self.POST_EDIT_URL: 'posts/create_post.html',
         }
         # Проверяем HTML-шаблон при обращении к name
         for reverse_name, template in templates_pages_names.items():
@@ -83,54 +89,46 @@ class PostPagesTests(TestCase):
         # Подсчитаем количество записей в Task
         post_count = Post.objects.count()
         form_data = {
-            'text': 'texto_testo',
+            'text': 'text_test_cod11',
             'group': f'{self.post.group.id}',
         }
         # Отправляем POST-запрос
         response = self.authorized_client.post(
-            reverse('posts:post_create'),
+            CREATE_POST_URL,
             data=form_data,
             follow=True
         )
 
         # Проверяем, сработал ли редирект
-        post_author = self.post.author
-        self.assertRedirects(response, (reverse(
-            'posts:profile', kwargs={'username': f'{post_author}'}
-        )))
+        self.assertRedirects(response, PROFILE_URL)
         # Проверяем, увеличилось ли число постов
         self.assertEqual(Post.objects.count(), post_count + 1)
         # Проверяем, что создалась новая запись
-        self.assertTrue(
-            Post.objects.filter(
-                text='texto_testo',
-                group=self.group.id
-            ).exists()
-        )
+        # Данные последней записи совпадают с тестовыми
+        last_post = Post.objects.order_by('pk').last()
+        expected_post_text = form_data['text']
+        expected_post_group = int(form_data['group'])
+        self.assertEqual(last_post.text, expected_post_text)
+        self.assertEqual(last_post.group_id, expected_post_group)
 
     def test_edit_post(self):
         """Валидная форма редактирует Пост в БД."""
-
         form_data = {
-            'text': 'texto_testo',
+            'text': 'text_test357',
             'group': f'{self.post.group.id}',
         }
         # Отправляем POST-запрос
-        postik_id = self.post.id
-        response = self.authorized_client.post((
-            reverse('posts:post_edit', kwargs={'post_id': f'{postik_id}'})),
+        response = self.authorized_client.post(
+            self.POST_EDIT_URL,
             data=form_data,
             follow=True
         )
         # Проверяем, сработал ли редирект
-        self.assertRedirects(response, (
-            reverse('posts:post_detail', kwargs={'post_id': f'{postik_id}'})
-        ))
-        # Проверяем, что создалась новая запись
+        self.assertRedirects(response, (self.POST_DETAIL_URL))
+        # Проверяем, что пост отредактирован
         self.assertTrue(
             Post.objects.filter(
-                text='texto_testo',
+                text='text_test357',
                 group=self.group.id
-
             ).exists()
         )

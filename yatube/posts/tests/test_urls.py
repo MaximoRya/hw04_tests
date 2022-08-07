@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
 from posts.models import Group, Post
+from http import HTTPStatus
 
 User = get_user_model()
 
@@ -38,43 +39,43 @@ class PostURLTests(TestCase):
         # Отправляем запрос через client,
         # созданный в setUp()
         response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_profile(self):
         """Страница Profile доступна любому пользователю"""
         post_author = self.post.author
         response = self.guest_client.get(f'/profile/{post_author}/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_detail(self):
         """Страница Post_detail доступна любому пользователю"""
         post_id = self.post.pk
         response = self.guest_client.get(f'/posts/{post_id}/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_group(self):
         """Страница Group доступна любому пользователю"""
         group_slug = self.post.group.slug
         response = self.guest_client.get(f'/group/{group_slug}/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверка кода 404 для несуществующих страниц
     def test_unexisting(self):
         """Несуществующая страница выдаёт код 404"""
         response = self.guest_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     # Проверка доступа к созданию нового поста для авторизованного пользователя
     def test_create(self):
         """Страница Create доступна авторизованному пользователю"""
         response = self.authorized_client.get('/create/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_edit(self):
         """Страница редактирования доступна автору поста"""
         post_id = self.post.pk
         response = self.authorized_client.get(f'/posts/{post_id}/edit/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_home_url_uses_correct_template(self):
         """Страница по адресу / использует шаблон posts/index.html."""

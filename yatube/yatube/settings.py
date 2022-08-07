@@ -9,6 +9,8 @@ SECRET_KEY = 'kxl1@z$!35bn0+r2)p%8h@ik@$^4$*x-9fhr2^355!=%#$34d%'
 
 DEBUG = True
 
+COUNT_POST_FOR_PAGE = 10
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',

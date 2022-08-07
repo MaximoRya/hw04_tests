@@ -137,3 +137,5 @@ coverage.xml
 *.cover
 bootstrap.min.css
 media/
+sent_emails/
+.vscode/
