@@ -1,6 +1,7 @@
 # posts/tests/test_urls.py
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+from django.core.cache import cache
 
 from posts.models import Group, Post
 from http import HTTPStatus
@@ -79,11 +80,13 @@ class PostURLTests(TestCase):
 
     def test_home_url_uses_correct_template(self):
         """Страница по адресу / использует шаблон posts/index.html."""
+        cache.clear()
         response = self.authorized_client.get('/')
         self.assertTemplateUsed(response, 'posts/index.html')
 
     def test_urls_uses_correct_template(self):
         """URL-адреса используют соответствующие шаблоны."""
+        cache.clear()
         group_slug = self.post.group.slug
         post_author = self.post.author
         post_id = self.post.pk
@@ -94,6 +97,8 @@ class PostURLTests(TestCase):
             f'/profile/{post_author}/': 'posts/profile.html',
             f'/posts/{post_id}/': 'posts/post_detail.html',
             '/create/': 'posts/create_post.html',
+            # Проверка шаблона кастомной страницы 404
+            '/no_page/': 'core/404.html',
         }
         for address, template, in templates_url_names.items():
             with self.subTest(address=address):

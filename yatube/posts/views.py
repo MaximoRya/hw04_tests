@@ -6,12 +6,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from posts.forms import PostForm, CommentForm
+from django.urls import reverse
+from django.views.decorators.cache import cache_page
 
-from .models import Group, Post, User, Comment
+from .models import Follow, Group, Post, User, Comment
 
 from yatube.settings import COUNT_POST_FOR_PAGE
 
-
+@cache_page(60 * 15, key_prefix='index_page')
 def index(request):
     """Метод для отображения информации  на главной странице."""
     post_list = Post.objects.all()
@@ -147,3 +149,38 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post_id)
+
+
+@login_required
+def follow_index(request):
+    list_of_posts = Post.objects.filter(author__following__user=request.user)
+    paginator = Paginator(list_of_posts, COUNT_POST_FOR_PAGE)
+    page_namber = request.GET.get('page')
+    page_obj = paginator.get_page(page_namber)
+    context = {'page_obj': page_obj}
+    return render(request, 'posts/follow.html', context)
+
+
+@login_required
+def profile_follow(request, username):
+    user=request.user
+    author=User.objects.get(username=username)
+    if user != author:
+        Follow.objects.get_or_create(user=user, author=author)
+    return redirect('posts:profile', username)
+# def profile_follow(request, username):
+#     user = request.user
+#     author = User.objects.get(username=username)
+#     is_follower = Follow.objects.filter(user=user, author=author)
+#     if user != author and not is_follower.exists():
+#         Follow.objects.filter(user=request.user, author=author)
+#     return redirect(reverse('posts:profile', args=[username]))
+
+
+@login_required
+def profile_unfollow(request, username):
+    author = get_object_or_404(User, username=username)
+    is_follower = Follow.objects.filter(user=request.user, author=author)
+    if is_follower.exists():
+        is_follower.delete()
+    return redirect('posts:profile', username=author)

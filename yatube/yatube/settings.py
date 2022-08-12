@@ -7,9 +7,9 @@ EMPTY_VALUE_DISPLAY = '-пусто-'
 
 SECRET_KEY = 'kxl1@z$!35bn0+r2)p%8h@ik@$^4$*x-9fhr2^355!=%#$34d%'
 
-DEBUG = True
-
 COUNT_POST_FOR_PAGE = 10
+
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -118,3 +118,11 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
